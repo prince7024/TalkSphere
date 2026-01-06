@@ -2,13 +2,16 @@ import User from "../models/User.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { generateToken } from "../utils/token.js";
 
+const isProd = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: false, 
-  sameSite: "lax",
+  secure: isProd,                 // ✅ MUST be true in production
+  sameSite: isProd ? "None" : "Lax", // ✅ cross-site cookie support
   path: "/",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
+
 
 // REGISTER
 export const register = asyncHandler(async (req, res) => {
@@ -46,6 +49,12 @@ export const login = asyncHandler(async (req, res) => {
 
 // LOGOUT
 export const logout = asyncHandler(async (req, res) => {
-  res.clearCookie("token", { path: "/" });
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    path: "/",
+  });
+
   res.json({ message: "Logged out" });
 });
