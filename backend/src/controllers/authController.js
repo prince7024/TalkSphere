@@ -2,15 +2,14 @@ import User from "../models/User.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { generateToken } from "../utils/token.js";
 
-const isProd = process.env.NODE_ENV === "production";
-
 const cookieOptions = {
   httpOnly: true,
-  secure: isProd,                 // ✅ MUST be true in production
-  sameSite: isProd ? "None" : "Lax", // ✅ cross-site cookie support
+  secure: true,       
+  sameSite: "None",   
   path: "/",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
+
 
 
 // REGISTER
