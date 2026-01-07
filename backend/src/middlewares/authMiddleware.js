@@ -1,18 +1,20 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// Middleware to protect routes
 export const requireAuth = async (req, res, next) => {
-  const token = req.cookies?.token;
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
+  // Expecting: Authorization: Bearer <token>
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
+  const token = authHeader.split(" ")[1];
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-password");
 
+    const user = await User.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
@@ -20,8 +22,6 @@ export const requireAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    console.error("Auth error:", err.message);
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
-
